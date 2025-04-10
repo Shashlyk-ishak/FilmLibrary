@@ -1,0 +1,169 @@
+@model FilmLibrary.ViewModels.MovieViewModel
+
+@{
+    ViewData["Title"] = "Редактировать фильм";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-center">Edit Movie</h3>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    <input type="hidden" asp-for="MovieId" />
+                    <input type="hidden" asp-for="ExistingCoverImagePath" />
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Title" class="form-label"></label>
+                        <input asp-for="Title" class="form-control" required />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="4" required></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Genre" class="form-label"></label>
+                        <input asp-for="Genre" class="form-control" required />
+                        <span asp-validation-for="Genre" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="ReleaseYear" class="form-label"></label>
+                        <input asp-for="ReleaseYear" class="form-control" type="number" min="1888" max="2100" required />
+                        <span asp-validation-for="ReleaseYear" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="TrailerUrl" class="form-label"></label>
+                        <input asp-for="TrailerUrl" class="form-control" type="url" />
+                        <span asp-validation-for="TrailerUrl" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">Актеры и роли</label>
+                        <div id="actorsContainer">
+                            @for (var i = 0; i < Model.ActorNames.Count; i++)
+                            {
+                                <div class="row mb-2 actor-entry">
+                                    <div class="col-md-5">
+                                        <input type="text" name="ActorNames" class="form-control" value="@Model.ActorNames[i]" placeholder="Actor Name" required />
+                                    </div>
+                                    <div class="col-md-5">
+                                        <input type="text" name="ActorRoles" class="form-control" value="@Model.ActorRoles[i]" placeholder="Role" required />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-danger remove-actor">Удалить</button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <button type="button" class="btn btn-secondary mt-2" id="addActor">Добавить актера</button>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">Режиссеры</label>
+                        <div id="directorsContainer">
+                            @for (var i = 0; i < Model.DirectorNames.Count; i++)
+                            {
+                                <div class="row mb-2 director-entry">
+                                    <div class="col-md-10">
+                                        <input type="text" name="DirectorNames" class="form-control" value="@Model.DirectorNames[i]" placeholder="Director Name" required />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-danger remove-director">Удалить</button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <button type="button" class="btn btn-secondary mt-2" id="addDirector">Добавить режиссера</button>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="CoverImage" class="form-label">Обложка фильма</label>
+                        <input asp-for="CoverImage" class="form-control" type="file" accept="image/*" />
+                        <span asp-validation-for="CoverImage" class="text-danger"></span>
+                        @if (!string.IsNullOrEmpty(Model.ExistingCoverImagePath))
+                        {
+                            <div class="mt-2">
+                                <img src="@Model.ExistingCoverImagePath" alt="Current Cover" class="img-thumbnail" style="max-height: 200px" />
+                                <p class="text-muted">Current cover image. Upload a new one to replace it.</p>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                        <a asp-action="Index" class="btn btn-secondary">Вернуться назад</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function() {
+            // Предварительный просмотр загруженного изображения
+            $("#CoverImage").change(function() {
+                if (this.files && this.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $("img.img-thumbnail").attr("src", e.target.result);
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+
+            // Добавить актера
+            $("#addActor").click(function() {
+                const actorHtml = `
+                    <div class="row mb-2 actor-entry">
+                        <div class="col-md-5">
+                            <input type="text" name="ActorNames" class="form-control" placeholder="Actor Name" required />
+                        </div>
+                        <div class="col-md-5">
+                            <input type="text" name="ActorRoles" class="form-control" placeholder="Role" required />
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-danger remove-actor">Remove</button>
+                        </div>
+                    </div>`;
+                $("#actorsContainer").append(actorHtml);
+            });
+
+            // Добавить режиссера
+            $("#addDirector").click(function() {
+                const directorHtml = `
+                    <div class="row mb-2 director-entry">
+                        <div class="col-md-10">
+                            <input type="text" name="DirectorNames" class="form-control" placeholder="Director Name" required />
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-danger remove-director">Remove</button>
+                        </div>
+                    </div>`;
+                $("#directorsContainer").append(directorHtml);
+            });
+
+            // Удалить актера
+            $(document).on("click", ".remove-actor", function() {
+                $(this).closest(".actor-entry").remove();
+            });
+
+            // Удалить режиссера
+            $(document).on("click", ".remove-director", function() {
+                $(this).closest(".director-entry").remove();
+            });
+        });
+    </script>
+} 

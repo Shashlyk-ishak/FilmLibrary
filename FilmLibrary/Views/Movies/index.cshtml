@@ -1,0 +1,48 @@
+﻿@model IEnumerable<FilmLibrary.Models.Movie>
+
+@{
+    ViewData["Title"] = "Фильмы";
+}
+
+<h1>Movies</h1>
+
+@if (User.IsInRole("Administrator"))
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Добавить новый фильм</a>
+    </p>
+}
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                @if (!string.IsNullOrEmpty(item.CoverImagePath))
+                {
+                    <img src="@item.CoverImagePath" class="card-img-top" alt="@item.Title">
+                }
+                else
+                {
+                    <img src="/images/no-poster.jpg" class="card-img-top" alt="No poster available">
+                }
+                <div class="card-body">
+                    <h5 class="card-title">@item.Title</h5>
+                    <p class="card-text">@item.Description</p>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Genre: @item.Genre<br />
+                            Year: @item.ReleaseYear
+                        </small>
+                    </p>
+                    <a asp-action="Details" asp-route-id="@item.MovieId" class="btn btn-primary">Подробнее</a>
+                    @if (User.IsInRole("Administrator"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.MovieId" class="btn btn-secondary">Редактировать</a>
+                        <a asp-action="Delete" asp-route-id="@item.MovieId" class="btn btn-danger">Удалить</a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

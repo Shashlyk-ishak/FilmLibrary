@@ -1,0 +1,59 @@
+﻿@model FilmLibrary.Models.User
+
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">User Profile</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-4">
+                            <strong>Username:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            @Model.UserName
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4">
+                            <strong>Email:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            @Model.Email
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4">
+                            <strong>Phone Number:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            @(string.IsNullOrEmpty(Model.PhoneNumber) ? "Not provided" : Model.PhoneNumber)
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4">
+                            <strong>Account Created:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            @Model.CreatedAt.ToString("d")
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4">
+                            <strong>Last Login:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            @(Model.LastLoginAt?.ToString("d") ?? "Never")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,83 @@
+﻿@model FilmLibrary.Models.Movie
+
+<div class="card h-100">
+    @if (!string.IsNullOrEmpty(Model.CoverImagePath))
+    {
+            <img src="@Model.CoverImagePath" class="card-img-top" alt="@Model.Title" style="height: 400px; object-fit: cover;">
+    }
+    else
+    {
+            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 400px;">
+                <span>No Image</span>
+            </div>
+    }
+    <div class="card-body">
+        <h5 class="card-title">@Model.Title</h5>
+        <p class="card-text text-truncate">@Model.Description</p>
+        <div class="mb-2">
+            <span class="badge bg-primary">@Model.Genre</span>
+            <span class="badge bg-info">@Model.ReleaseYear</span>
+        </div>
+        @if (User.Identity.IsAuthenticated)
+        {
+                <div class="rating-section mb-3">
+                    <div class="stars" data-movie-id="@Model.MovieId">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                                <i class="fas fa-star star-rating" data-rating="@i"></i>
+                    }
+                    </div>
+                    <small class="text-muted">Click to rate</small>
+                </div>
+        }
+        <div class="btn-group w-100">
+            <a asp-controller="Movies" asp-action="Details" asp-route-id="@Model.MovieId" class="btn btn-primary">
+                <i class="fas fa-info-circle"></i> Details
+            </a>
+            @if (!string.IsNullOrEmpty(Model.TrailerUrl))
+            {
+                    <a href="@Model.TrailerUrl" target="_blank" class="btn btn-secondary">
+                        <i class="fas fa-play-circle"></i> Watch Trailer
+                    </a>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <script>
+            $(document).ready(function() {
+                $('.star-rating').hover(
+                    function() {
+                        var rating = $(this).data('rating');
+                        var stars = $(this).parent().find('.star-rating');
+                        stars.each(function(index) {
+                            if (index < rating) {
+                                $(this).addClass('text-warning');
+                            }
+                        });
+                    },
+                    function() {
+                        $(this).parent().find('.star-rating').removeClass('text-warning');
+                    }
+                );
+
+                $('.star-rating').click(function() {
+                    var rating = $(this).data('rating');
+                    var movieId = $(this).parent().data('movie-id');
+
+                    $.post('/Movies/Rate', { movieId: movieId, rating: rating * 2 })
+                        .done(function(response) {
+                            if (response.success) {
+                                toastr.success('Rating saved successfully!');
+                            } else {
+                                toastr.error('Failed to save rating.');
+                            }
+                        })
+                        .fail(function() {
+                            toastr.error('An error occurred while saving your rating.');
+                        });
+                });
+            });
+        </script>
+} 

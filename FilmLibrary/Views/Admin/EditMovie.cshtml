@@ -1,0 +1,76 @@
+﻿@model FilmLibrary.ViewModels.MovieViewModel
+
+@{
+    ViewData["Title"] = "Edit Movie";
+}
+
+<div class="container mt-4">
+    <h2>Edit Movie</h2>
+    <hr />
+
+    <form asp-action="EditMovie" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="MovieId" />
+        <input type="hidden" asp-for="ExistingCoverImagePath" />
+
+        <div class="form-group">
+            <label asp-for="Title" class="control-label"></label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Description" class="control-label"></label>
+            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Genre" class="control-label"></label>
+            <input asp-for="Genre" class="form-control" />
+            <span asp-validation-for="Genre" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="ReleaseYear" class="control-label"></label>
+            <input asp-for="ReleaseYear" class="form-control" type="number" />
+            <span asp-validation-for="ReleaseYear" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Rating" class="control-label"></label>
+            <input asp-for="Rating" class="form-control" type="number" step="0.1" />
+            <span asp-validation-for="Rating" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="TrailerUrl" class="control-label"></label>
+            <input asp-for="TrailerUrl" class="form-control" />
+            <span asp-validation-for="TrailerUrl" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            @if (!string.IsNullOrEmpty(Model.ExistingCoverImagePath))
+            {
+                <div class="mb-2">
+                    <img src="@Model.ExistingCoverImagePath" alt="Current Cover" style="max-width: 200px;" class="img-thumbnail" />
+                </div>
+            }
+            <label asp-for="CoverImage" class="control-label"></label>
+            <input asp-for="CoverImage" class="form-control" type="file" accept="image/*" />
+            <span asp-validation-for="CoverImage" class="text-danger"></span>
+            <small class="form-text text-muted">Leave empty to keep the current image</small>
+        </div>
+
+        <div class="form-group mt-4">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a asp-action="ManageMovies" class="btn btn-secondary">Back to List</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+} 

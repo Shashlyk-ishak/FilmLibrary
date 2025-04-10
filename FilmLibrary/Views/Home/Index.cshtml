@@ -1,0 +1,51 @@
+@model IEnumerable<FilmLibrary.Models.Movie>
+
+@{
+    ViewData["Title"] = "Главная";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Добро пожаловать в Фильмотеку</h1>
+    <p>Откройте для себя мир кино: смотрите, оценивайте и обсуждайте фильмы.</p>
+</div>
+
+<div class="row">
+    @foreach (var movie in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <img src="@(movie.CoverImagePath ?? "/images/no-poster.jpg")" class="card-img-top" alt="@movie.Title" style="height: 400px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">@movie.Title</h5>
+                    <p class="card-text text-truncate">@movie.Description</p>
+                    <div class="mb-2">
+                        <span class="badge bg-primary">@movie.Genre</span>
+                        <span class="badge bg-info">@movie.ReleaseYear</span>
+                    </div>
+                    <a asp-controller="Movies" asp-action="Details" asp-route-id="@movie.MovieId" class="btn btn-primary">Подробнее</a>
+                    @if (!string.IsNullOrEmpty(movie.TrailerUrl))
+                    {
+                        <a href="@movie.TrailerUrl" target="_blank" class="btn btn-outline-primary">
+                            <i class="fas fa-play-circle"></i> Трейлер
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center mt-5">
+        <h3>No movies available.</h3>
+        @if (User.IsInRole("Administrator"))
+        {
+            <p>
+                <a href="@Url.Action("Create", "Movies")" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add Movie
+                </a>
+            </p>
+        }
+    </div>
+} 

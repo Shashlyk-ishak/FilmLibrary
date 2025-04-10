@@ -1,0 +1,106 @@
+@model IEnumerable<FilmLibrary.Models.User>
+@inject Microsoft.AspNetCore.Identity.UserManager<FilmLibrary.Models.User> UserManager
+
+@{
+    ViewData["Title"] = "Управление пользователями";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4">Управление пользователями</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Имя пользователя</th>
+                            <th>Email</th>
+                            <th>Телефон</th>
+                            <th>Роли</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td>@user.UserName</td>
+                                <td>@user.Email</td>
+                                <td>@user.PhoneNumber</td>
+                                <td>
+                                    @if (await UserManager.IsInRoleAsync(user, "Administrator"))
+                                    {
+                                        <span class="badge bg-danger">Администратор</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-primary">Пользователь</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.Now)
+                                    {
+                                        <span class="badge bg-warning text-dark">Заблокирован</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Активен</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        @if (!await UserManager.IsInRoleAsync(user, "Administrator"))
+                                        {
+                                            @if (user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.Now)
+                                            {
+                                                <form asp-action="UnlockUser" asp-route-id="@user.Id" method="post" style="display: inline;">
+                                                    <button type="submit" class="btn btn-success btn-sm" title="Разблокировать">
+                                                        <i class="bi bi-unlock"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form asp-action="LockUser" asp-route-id="@user.Id" method="post" style="display: inline;">
+                                                    <button type="submit" class="btn btn-warning btn-sm" title="Заблокировать">
+                                                        <i class="bi bi-lock"></i>
+                                                    </button>
+                                                </form>
+                                            }
+
+                                            @if (!await UserManager.IsInRoleAsync(user, "Administrator"))
+                                            {
+                                                <form asp-action="MakeAdmin" asp-route-id="@user.Id" method="post" style="display: inline;">
+                                                    <button type="submit" class="btn btn-info btn-sm" title="Сделать администратором">
+                                                        <i class="bi bi-person-fill-gear"></i>
+                                                    </button>
+                                                </form>
+                                            }
+
+                                            <form asp-action="DeleteUser" asp-route-id="@user.Id" method="post" style="display: inline;"
+                                                  onsubmit="return confirm('Вы уверены, что хотите удалить этого пользователя?');">
+                                                <button type="submit" class="btn btn-danger btn-sm" title="Удалить">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+}

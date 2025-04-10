@@ -1,0 +1,226 @@
+@model FilmLibrary.ViewModels.MovieDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Movie.Title;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            @if (!string.IsNullOrEmpty(Model.Movie.CoverImagePath))
+            {
+                <img src="@Model.Movie.CoverImagePath" class="img-fluid rounded" alt="@Model.Movie.Title">
+            }
+            else
+            {
+                <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 400px;">
+                    <span>Нет изображения</span>
+                </div>
+            }
+        </div>
+        <div class="col-md-8">
+            <h2>@Model.Movie.Title</h2>
+            <div class="mb-3">
+                <span class="badge bg-primary">@Model.Movie.Genre</span>
+                <span class="badge bg-info">@Model.Movie.ReleaseYear</span>
+                @if (Model.AverageRating > 0)
+                {
+                    <span class="badge bg-success">Рейтинг: @Model.AverageRating.ToString("F1") / 10</span>
+                }
+            </div>
+
+            @if (User.Identity.IsAuthenticated && !User.IsInRole("Administrator"))
+            {
+                <div class="rating-section mb-3">
+                    <h4>Оценить фильм</h4>
+                    <div class="stars" data-movie-id="@Model.Movie.MovieId">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            var currentRating = Model.UserRating?.Rating ?? 0;
+                            var starRating = currentRating > 0 ? currentRating / 2.0 : 0;
+                            <i class="fas fa-star star-rating @(starRating >= i ? "text-warning" : "")"
+                               data-rating="@i" style="font-size: 1.5rem; cursor: pointer;"></i>
+                        }
+                    </div>
+                    <small class="text-muted">Нажмите, чтобы оценить</small>
+                </div>
+
+                <div class="mb-3">
+                    <form asp-controller="Movies" asp-action="AddComment" asp-route-id="@Model.Movie.MovieId" method="post" id="commentForm">
+                        @Html.AntiForgeryToken()
+                        <div class="form-group">
+                            <label for="comment">Ваш отзыв</label>
+                            <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-2">Отправить отзыв</button>
+                    </form>
+                </div>
+            }
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <p class="lead">@Model.Movie.Description</p>
+
+            @if (!string.IsNullOrEmpty(Model.Movie.TrailerUrl))
+            {
+                <div class="mb-3">
+                    <a href="@Model.Movie.TrailerUrl" target="_blank" class="btn btn-outline-primary">
+                        <i class="bi bi-play-circle"></i> Смотреть трейлер
+                    </a>
+                </div>
+            }
+
+            <div class="mt-4">
+                <h4>В ролях</h4>
+                @if (Model.MovieActors != null && Model.MovieActors.Any())
+                {
+                    <ul class="list-unstyled">
+                        @foreach (var actor in Model.MovieActors)
+                        {
+                            <li>@actor.Actor.Name - @actor.Role</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>Информация об актёрах отсутствует.</p>
+                }
+            </div>
+
+            <div class="mt-4">
+                <h4>Режиссёры</h4>
+                @if (Model.MovieDirectors != null && Model.MovieDirectors.Any())
+                {
+                    <ul class="list-unstyled">
+                        @foreach (var director in Model.MovieDirectors)
+                        {
+                            <li>@director.Director.Name</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>Информация о режиссёрах отсутствует.</p>
+                }
+            </div>
+
+            <div class="mt-4">
+                <p class="text-muted">
+                    Добавил @Model.Movie.Creator.UserName, @Model.Movie.CreatedAt.ToString("dd MMMM yyyy")
+                </p>
+            </div>
+
+            @if (User.IsInRole("Administrator"))
+            {
+                <div class="mt-4">
+                    <a asp-action="Edit" asp-route-id="@Model.Movie.MovieId" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Редактировать
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@Model.Movie.MovieId" class="btn btn-danger">
+                        <i class="fas fa-trash-alt"></i> Удалить
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (Model.Ratings != null && Model.Ratings.Any())
+    {
+        <div class="mt-5">
+            <h3>Отзывы пользователей</h3>
+            @foreach (var rating in Model.Ratings)
+            {
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            Оценка: @rating.Rating.ToString("F1") / 10
+                            <small class="text-muted">от @rating.User.UserName</small>
+                        </h5>
+                        @if (!string.IsNullOrEmpty(rating.Comment))
+                        {
+                            <p class="card-text">@rating.Comment</p>
+                        }
+                        <small class="text-muted">@rating.RatedAt.ToString("dd MMMM yyyy")</small>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var antiForgeryToken = $('input[name="__RequestVerificationToken"]').val();
+            var currentRating = @(Model.UserRating?.Rating ?? 0) / 2.0;
+
+            // Функция для обновления отображения звёзд
+            function updateStarDisplay(stars, rating) {
+                stars.removeClass('text-warning');
+                stars.each(function(index) {
+                    if (index < rating) {
+                        $(this).addClass('text-warning');
+                    }
+                });
+            }
+
+            // Инициализация звёзд с текущей оценкой
+            var stars = $('.stars').find('.star-rating');
+            updateStarDisplay(stars, currentRating);
+
+            $('.star-rating').hover(
+                function() {
+                    var rating = $(this).data('rating');
+                    var stars = $(this).parent().find('.star-rating');
+                    updateStarDisplay(stars, rating);
+                },
+                function() {
+                    var stars = $(this).parent().find('.star-rating');
+                    updateStarDisplay(stars, currentRating);
+                }
+            );
+
+            $('.star-rating').click(function() {
+                var rating = $(this).data('rating') * 2;
+                var movieId = $(this).parent().data('movie-id');
+                var stars = $(this).parent().find('.star-rating');
+
+                $.ajax({
+                    url: '/Movies/Rate',
+                    type: 'POST',
+                    data: {
+                        movieId: movieId,
+                        rating: rating,
+                        __RequestVerificationToken: antiForgeryToken
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('.badge.bg-success').text('Рейтинг: ' + response.averageRating.toFixed(1) + ' / 10');
+                            currentRating = rating / 2;
+                            updateStarDisplay(stars, currentRating);
+                        } else {
+                            alert(response.message || 'Не удалось сохранить оценку. Пожалуйста, попробуйте снова.');
+                        }
+                    },
+                    error: function() {
+                        alert('Произошла ошибка при сохранении оценки. Пожалуйста, попробуйте снова.');
+                    }
+                });
+            });
+        });
+    </script>
+} 

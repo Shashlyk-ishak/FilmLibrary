@@ -1,0 +1,143 @@
+@model FilmLibrary.ViewModels.MovieViewModel
+
+@{
+    ViewData["Title"] = "Добавить новый фильм";
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>Добавить новый фильм</h2>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Title" class="form-label">Название</label>
+                    <input asp-for="Title" class="form-control" required />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Description" class="form-label">Описание</label>
+                    <textarea asp-for="Description" class="form-control" rows="4" required></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Genre" class="form-label">Жанр</label>
+                    <input asp-for="Genre" class="form-control" required />
+                    <span asp-validation-for="Genre" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="ReleaseYear" class="form-label">Год выпуска</label>
+                    <input asp-for="ReleaseYear" class="form-control" type="number" min="1888" max="2100" required />
+                    <span asp-validation-for="ReleaseYear" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="TrailerUrl" class="form-label">Ссылка на трейлер</label>
+                    <input asp-for="TrailerUrl" class="form-control" type="url" />
+                    <span asp-validation-for="TrailerUrl" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="CoverImage" class="form-label">Постер фильма</label>
+                    <input asp-for="CoverImage" class="form-control" type="file" accept="image/*" required />
+                    <span asp-validation-for="CoverImage" class="text-danger"></span>
+                    <small class="text-muted">Рекомендуемый размер: 500x750 пикселей</small>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="form-label">Актёры</label>
+                    <div id="actorsContainer">
+                        <div class="row mb-2 actor-entry">
+                            <div class="col-md-5">
+                                <input type="text" name="ActorNames" class="form-control" placeholder="Имя актёра" required />
+                            </div>
+                            <div class="col-md-5">
+                                <input type="text" name="ActorRoles" class="form-control" placeholder="Роль" required />
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-danger remove-actor">Удалить</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary mt-2" id="addActor">Добавить актёра</button>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label class="form-label">Режиссёры</label>
+                    <div id="directorsContainer">
+                        <div class="row mb-2 director-entry">
+                            <div class="col-md-10">
+                                <input type="text" name="DirectorNames" class="form-control" placeholder="Имя режиссёра" required />
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-danger remove-director">Удалить</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary mt-2" id="addDirector">Добавить режиссёра</button>
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary">Добавить фильм</button>
+                    <a asp-action="Index" class="btn btn-secondary">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function() {
+            // Добавление актёра
+            $("#addActor").click(function() {
+                const actorHtml = `
+                    <div class="row mb-2 actor-entry">
+                        <div class="col-md-5">
+                            <input type="text" name="ActorNames" class="form-control" placeholder="Имя актёра" required />
+                        </div>
+                        <div class="col-md-5">
+                            <input type="text" name="ActorRoles" class="form-control" placeholder="Роль" required />
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-danger remove-actor">Удалить</button>
+                        </div>
+                    </div>`;
+                $("#actorsContainer").append(actorHtml);
+            });
+
+            // Добавление режиссёра
+            $("#addDirector").click(function() {
+                const directorHtml = `
+                    <div class="row mb-2 director-entry">
+                        <div class="col-md-10">
+                            <input type="text" name="DirectorNames" class="form-control" placeholder="Имя режиссёра" required />
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-danger remove-director">Удалить</button>
+                        </div>
+                    </div>`;
+                $("#directorsContainer").append(directorHtml);
+            });
+
+            // Удаление актёра
+            $(document).on("click", ".remove-actor", function() {
+                $(this).closest(".actor-entry").remove();
+            });
+
+            // Удаление режиссёра
+            $(document).on("click", ".remove-director", function() {
+                $(this).closest(".director-entry").remove();
+            });
+        });
+    </script>
+} 
